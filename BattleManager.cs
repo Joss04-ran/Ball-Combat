@@ -14,4 +14,9 @@ public class BattleManager : MonoBehaviour
         isStart = true;
         Debug.Log("Start the sim!");
     }
+
+    public static void EndGame()
+    {
+        Application.Quit();
+    }
 }

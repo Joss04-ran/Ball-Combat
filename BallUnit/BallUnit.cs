@@ -298,7 +298,7 @@ public class BallUnit : MonoBehaviour
         int highestHpFound = 0;
         int targetMaxHp = maxHp;
 
-        // Baca langsung seluruh bola yang aktif di arena
+
         BallUnit[] allBalls = FindObjectsByType<BallUnit>(FindObjectsSortMode.None);
         foreach (var ball in allBalls)
         {
@@ -369,5 +369,11 @@ public class BallUnit : MonoBehaviour
             }
         }
         Destroy(gameObject);
+
+        DG.Tweening.DOVirtual.DelayedCall(3.0f, () =>
+        {
+            BattleManager.EndGame();
+        }
+            );
     }
 }

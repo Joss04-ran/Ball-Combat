@@ -18,7 +18,6 @@ public class ShootWithIncreasedAttackSpeedSkill : BaseSkill
 
     private Sprite loadedBulletSprite;
     private static Sprite fallbackBulletSprite;
-    private bool isUltimate = false;
 
     void Awake()
     {
@@ -103,12 +102,7 @@ public class ShootWithIncreasedAttackSpeedSkill : BaseSkill
         CreateBullet(finalShootDirection, skillDamage);
         if (ultimateData != null && Random.value <= ultimateData.chance)
         {
-            if (isUltimate == false)
-            {
-                thisUnit.ApplySheriffUltimateBuff(ultimateData.accuracy, ultimateData.durationBuff);
-                isUltimate = true;
-            }
-            else return;
+            thisUnit.ApplySheriffUltimateBuff(ultimateData.accuracy, ultimateData.durationBuff);
         }
     }
 

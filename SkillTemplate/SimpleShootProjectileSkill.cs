@@ -15,7 +15,6 @@ public class SimpleShootProjectileSkill : BaseSkill
     public string projectileSpriteName;
     private Sprite loadedArrowSprite; 
     private static Sprite fallbackArrowSprite;
-    private bool isUltimate = false;
 
     void Awake()
     {
@@ -94,15 +93,8 @@ public class SimpleShootProjectileSkill : BaseSkill
         CreateArrow(shootDirection, finalDamage, isCrit);
         if (ultimateData != null && Random.value <= ultimateData.chance)
         {
-            if (isUltimate == false)
-            {
-                thisUnit.ApplyUltimateBuff(ultimateData.speedIncrease, ultimateData.evasionChance, ultimateData.durationBuff);
-                isUltimate = true;
-            }
-            else if (isUltimate)
-            {
-                return;
-            }
+            thisUnit.ApplyUltimateBuff(ultimateData.speedIncrease,
+    ultimateData.evasionChance, ultimateData.durationBuff);
         }
     }
 
