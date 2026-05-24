@@ -60,8 +60,7 @@ public class BallUnit : MonoBehaviour
                         movement.initSpeed = currentStat.movementSpeed;
                         baseSpeed = currentStat.movementSpeed;
                     }
-                    float targetSize = currentStat.size > 0 ? currentStat.size : 1f;
-                    transform.localScale = new Vector3(targetSize, targetSize, 1f);
+                    transform.DOScale(new Vector3(currentStat.size, currentStat.size, 1f), currentStat.size - 0.2f).SetEase(Ease.OutBack);
                     Rigidbody2D rb = GetComponent<Rigidbody2D>();
                     if (rb != null)
                     {
@@ -79,10 +78,6 @@ public class BallUnit : MonoBehaviour
                             cloneUnit.unitNameToLoad = this.unitNameToLoad;
                             cloneUnit.jsonFile = this.jsonFile;
                             clone.transform.localScale = Vector3.zero;
-                            Vector3 popDirection = new Vector3(UnityEngine.Random.Range(-0.8f, 0.8f), UnityEngine.Random.Range(-0.8f, 0.8f), 0);
-                            Vector3 targetPopPosition = transform.position + popDirection;
-                            clone.transform.DOMove(targetPopPosition, 0.4f).SetEase(Ease.OutBack);
-                            clone.transform.DOScale(new Vector3(targetSize, targetSize, 1f), 0.4f).SetEase(Ease.OutBack);
                         }
                     }
                     ApplySkillTemplate(currentStat.skillTemplate);
@@ -180,7 +175,7 @@ public class BallUnit : MonoBehaviour
             float reducedDamage = damage * (1f - currentStat.damageReduce);
             damage = Mathf.RoundToInt(reducedDamage);
             Debug.Log(currentStat.name + " Blocked! Damage reduced.");
-            if (damagePopup != null) Instantiate(damagePopup, transform.position, Quaternion.identity).GetComponent<DamagePopup>().Setup("Block!");
+            if (damagePopup != null) Instantiate(damagePopup, transform.position, Quaternion.identity).GetComponent<DamagePopup>().Setup(damage.ToString());
         }
         if (audioSource != null && hitSound != null)
         {

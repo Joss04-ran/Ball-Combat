@@ -10,10 +10,12 @@ public class SimpleShootProjectileSkill : BaseSkill
     private float timer;
     private Rigidbody2D rb;
     private BallUnit thisUnit;
+    public AudioClip shootClip;
 
     public string projectileSpriteName;
     private Sprite loadedArrowSprite; 
     private static Sprite fallbackArrowSprite;
+    private bool isUltimate = false;
 
     void Awake()
     {
@@ -69,6 +71,10 @@ public class SimpleShootProjectileSkill : BaseSkill
             if (timer <= 0)
             {
                 Shoot(target, aimDirection);
+                if (shootClip != null)
+                {
+                    AudioSource.PlayClipAtPoint(shootClip, transform.position);
+                }
                 timer = attackTime;
             }
         }
@@ -88,7 +94,15 @@ public class SimpleShootProjectileSkill : BaseSkill
         CreateArrow(shootDirection, finalDamage, isCrit);
         if (ultimateData != null && Random.value <= ultimateData.chance)
         {
-            thisUnit.ApplyUltimateBuff(ultimateData.speedIncrease, ultimateData.evasionChance, ultimateData.durationBuff);
+            if (isUltimate == false)
+            {
+                thisUnit.ApplyUltimateBuff(ultimateData.speedIncrease, ultimateData.evasionChance, ultimateData.durationBuff);
+                isUltimate = true;
+            }
+            else if (isUltimate)
+            {
+                return;
+            }
         }
     }
 
@@ -101,17 +115,23 @@ public class SimpleShootProjectileSkill : BaseSkill
         arrow.transform.localScale = new Vector3(0.6f, 0.08f, 1f);
 
         SpriteRenderer sr = arrow.AddComponent<SpriteRenderer>();
-        sr.sprite = loadedArrowSprite != null ? loadedArrowSprite : fallbackArrowSprite;
+        sr.sprite = loadedArrowSprite != null ? loadedArrowSprite : fallbackArrowSprite;        
         if (loadedArrowSprite != null) arrow.transform.localScale = new Vector3(2.5f, 2.5f, 1f);
         else arrow.transform.localScale = new Vector3(0.6f, 0.08f, 1f);
         sr.color = isCrit ? Color.red : Color.white; 
 
-        BoxCollider2D col = arrow.AddComponent<BoxCollider2D>();
+        PolygonCollider2D col = arrow.AddComponent<PolygonCollider2D>();
         col.isTrigger = true;
 
         Rigidbody2D arrowRb = arrow.AddComponent<Rigidbody2D>();
         arrowRb.bodyType = RigidbodyType2D.Kinematic;
         arrowRb.linearVelocity = dir * 15f;
+
+        Collider2D shooterCol = GetComponent<Collider2D>();
+        if (shooterCol != null)
+        {
+            Physics2D.IgnoreCollision(shooterCol, col);
+        }
 
         ArrowProjectile logic = arrow.AddComponent<ArrowProjectile>();
         logic.damage = damage;

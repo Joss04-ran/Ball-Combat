@@ -6,14 +6,12 @@ public class BattleManager : MonoBehaviour
     void Start()
     {
         isStart = false;
+        Invoke("StartBattle",0.0f);
     }
 
     void Update()
     {
-        if (!isStart && Input.GetKeyDown(KeyCode.Space))
-        {
-            isStart = true;
-            Debug.Log("BATTLE STARTED!");
-        }
+        isStart = true;
+        Debug.Log("Start the sim!");
     }
 }

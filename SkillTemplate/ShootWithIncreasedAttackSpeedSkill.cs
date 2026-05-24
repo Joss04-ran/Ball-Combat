@@ -14,9 +14,11 @@ public class ShootWithIncreasedAttackSpeedSkill : BaseSkill
     private float speedUpTimer;
     private Rigidbody2D rb;
     private BallUnit thisUnit;
+    public AudioClip shootClip;
 
     private Sprite loadedBulletSprite;
     private static Sprite fallbackBulletSprite;
+    private bool isUltimate = false;
 
     void Awake()
     {
@@ -81,6 +83,10 @@ public class ShootWithIncreasedAttackSpeedSkill : BaseSkill
             if (shootTimer <= 0)
             {
                 Shoot(aimDirection);
+                if (shootClip != null)
+                {
+                    AudioSource.PlayClipAtPoint(shootClip, transform.position);
+                }
                 shootTimer = attackTime;
             }
         }
@@ -97,7 +103,12 @@ public class ShootWithIncreasedAttackSpeedSkill : BaseSkill
         CreateBullet(finalShootDirection, skillDamage);
         if (ultimateData != null && Random.value <= ultimateData.chance)
         {
-            thisUnit.ApplySheriffUltimateBuff(ultimateData.accuracy, ultimateData.durationBuff);
+            if (isUltimate == false)
+            {
+                thisUnit.ApplySheriffUltimateBuff(ultimateData.accuracy, ultimateData.durationBuff);
+                isUltimate = true;
+            }
+            else return;
         }
     }
 
@@ -109,11 +120,16 @@ public class ShootWithIncreasedAttackSpeedSkill : BaseSkill
         SpriteRenderer sr = bullet.AddComponent<SpriteRenderer>();
         sr.sprite = loadedBulletSprite != null ? loadedBulletSprite : fallbackBulletSprite;
         if (loadedBulletSprite == null) bullet.transform.localScale = new Vector3(2f, 2f, 1f);
-        BoxCollider2D col = bullet.AddComponent<BoxCollider2D>();
+        PolygonCollider2D col = bullet.AddComponent<PolygonCollider2D>();
         col.isTrigger = true;
         Rigidbody2D bulletRb = bullet.AddComponent<Rigidbody2D>();
         bulletRb.bodyType = RigidbodyType2D.Kinematic;
         bulletRb.linearVelocity = dir * 25f;
+        Collider2D shooterCol = GetComponent<Collider2D>();
+        if (shooterCol != null)
+        {
+            Physics2D.IgnoreCollision(shooterCol, col);
+        }
         ParticleSystem ps = bullet.AddComponent<ParticleSystem>();
         var main = ps.main;
         main.startLifetime = 0.2f;  

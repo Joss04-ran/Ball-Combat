@@ -1,2 +1,12 @@
 fileFormatVersion: 2
 guid: b77bbcaacde468a49b92d3634085f868
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - shootClip: {fileID: 8300000, guid: ed62fa54295d3ee4db3858e3748f00eb, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
