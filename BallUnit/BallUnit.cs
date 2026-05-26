@@ -20,7 +20,8 @@ public class BallUnit : MonoBehaviour
     [HideInInspector] public BallStatData currentStat;
     private BallMovement movement;
     public GameObject explosionPrefab; 
-    public AudioClip hitSound;         
+    public AudioClip hitSound;
+    public AudioClip attackSound; 
     private AudioSource audioSource;
     public ParticleSystem buffParticle;
     private float baseSpeed;
@@ -38,7 +39,13 @@ public class BallUnit : MonoBehaviour
         LoadStatsFromJson();
         Invoke("DisableTeamCollisions", 0.1f);
     }
-
+    public void PlayAttackSound()
+    {
+        if (audioSource != null && attackSound != null)
+        {
+            audioSource.PlayOneShot(attackSound);
+        }
+    }
     void LoadStatsFromJson()
     {
         try
@@ -369,11 +376,5 @@ public class BallUnit : MonoBehaviour
             }
         }
         Destroy(gameObject);
-
-        DG.Tweening.DOVirtual.DelayedCall(3.0f, () =>
-        {
-            BattleManager.EndGame();
-        }
-            );
     }
 }

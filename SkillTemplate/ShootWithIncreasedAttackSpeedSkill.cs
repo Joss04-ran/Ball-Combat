@@ -124,6 +124,11 @@ public class ShootWithIncreasedAttackSpeedSkill : BaseSkill
         {
             Physics2D.IgnoreCollision(shooterCol, col);
         }
+        BallUnit myUnit = GetComponent<BallUnit>();
+        if (myUnit != null)
+        {
+            myUnit.PlayAttackSound();
+        }
         ParticleSystem ps = bullet.AddComponent<ParticleSystem>();
         var main = ps.main;
         main.startLifetime = 0.2f;  

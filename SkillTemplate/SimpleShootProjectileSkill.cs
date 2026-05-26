@@ -124,7 +124,11 @@ public class SimpleShootProjectileSkill : BaseSkill
         {
             Physics2D.IgnoreCollision(shooterCol, col);
         }
-
+        BallUnit myUnit = GetComponent<BallUnit>();
+        if (myUnit != null)
+        {
+            myUnit.PlayAttackSound();
+        }
         ArrowProjectile logic = arrow.AddComponent<ArrowProjectile>();
         logic.damage = damage;
         logic.shooterUnit = thisUnit;
