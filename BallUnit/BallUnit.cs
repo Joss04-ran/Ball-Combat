@@ -156,6 +156,17 @@ public class BallUnit : MonoBehaviour
                 brawlingsSkill.chanceIncreasePerUnitDefeat = currentStat.ultimateSkill.chanceIncreasePerUnitDefeat;
             }
         }
+        else if (skillName == "ShootExplosiveBomb")
+        {
+            skill = gameObject.AddComponent<ShootExplosiveBombSkill>();
+            var pirate = skill as ShootExplosiveBombSkill;
+            if (pirate != null)
+            {
+                pirate.attackTime = currentStat.attackTime > 0 ? currentStat.attackTime : 1.5f;
+                pirate.explosionRadius = currentStat.explosionRadius > 0 ? currentStat.explosionRadius : 2.5f;
+                pirate.projectileSpriteName = currentStat.spriteProjectile;
+            }
+        }
         if (skill != null)
         {
             skill.SetDamage(currentStat.damage);
@@ -344,6 +355,14 @@ public class BallUnit : MonoBehaviour
     private void Defeat()
     {
         Debug.Log(gameObject.name + " Has defeated");
+        if (gameObject.name == "Pirate")
+        {
+            var pirateSkill = GetComponent<ShootExplosiveBombSkill>();
+            if (pirateSkill != null)
+            {
+                pirateSkill.TriggerOnDeathUltimate();
+            }
+        }
         if (gameObject.name == "Brawlings")
         {
             UnarmedWithIncreasedChancePerDefeatSkill.IncrementDefeatCount(playerIndex);

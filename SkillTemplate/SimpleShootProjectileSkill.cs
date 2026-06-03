@@ -21,7 +21,13 @@ public class SimpleShootProjectileSkill : BaseSkill
         rb = GetComponent<Rigidbody2D>();
         thisUnit = GetComponent<BallUnit>();
     }
-
+    public override void SetupSkillData(BallStatData data)
+    {
+        this.critChance = data.critChance;
+        this.critDamage = data.critDamage;
+        this.attackTime = data.attackTime;
+        this.projectileSpriteName = data.spriteProjectile;
+    }
     public override void ActivateSkill()
     {
         if (weaponSprite != null) weaponSprite.enabled = true;

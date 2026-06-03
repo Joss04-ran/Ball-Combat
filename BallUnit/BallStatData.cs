@@ -34,6 +34,7 @@ public class UltimateSkillData
     public PotionListData listPotions;
     public float duration;
     public float chanceIncreasePerUnitDefeat;
+    public float explosionRadius;
 }
 [System.Serializable]
 public class BallStatData
@@ -58,4 +59,5 @@ public class BallStatData
     public string spriteProjectile;
     public UltimateSkillData ultimateSkill;
     public int amount;
+    public float explosionRadius;
 }

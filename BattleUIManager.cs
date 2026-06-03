@@ -120,6 +120,8 @@ public class BattleUIManager : MonoBehaviour
         string winnerName = "";
         if (loserIndex == 1) winnerName = namePlayer1;
         else if (loserIndex == 2) winnerName = namePlayer0;
+        else if (loserIndex == 3) winnerName = namePlayer1;
+        else if (loserIndex == 4) winnerName = namePlayer0;
         else winnerName = "DRAW";
         
         if (winnerName == "DRAW") victoryText.text = winnerName;
