@@ -26,6 +26,7 @@ public class BallUnit : MonoBehaviour
     public ParticleSystem buffParticle;
     private float baseSpeed;
     private int baseAttack;
+    public bool isInvincible = false;
     public static List<BallUnit> activeBalls = new List<BallUnit>();
 
     void Awake()
@@ -67,7 +68,7 @@ public class BallUnit : MonoBehaviour
                         movement.initSpeed = currentStat.movementSpeed;
                         baseSpeed = currentStat.movementSpeed;
                     }
-                    transform.DOScale(new Vector3(currentStat.size, currentStat.size, 1f), currentStat.size - 0.2f).SetEase(Ease.OutBack);
+                    transform.DOScale(new Vector3(currentStat.size, currentStat.size, 1f), currentStat.size - 0.2f).SetEase(Ease.OutBack).SetLink(gameObject); ;
                     Rigidbody2D rb = GetComponent<Rigidbody2D>();
                     if (rb != null)
                     {
@@ -89,12 +90,7 @@ public class BallUnit : MonoBehaviour
                     }
                     ApplySkillTemplate(currentStat.skillTemplate);
                 }
-
-                if (BattleUIManager.Instance != null)
-                {
-                    BattleUIManager.Instance.SetPlayerName(playerIndex, currentStat.name);
-                    BattleUIManager.Instance.UpdateHealthBar(playerIndex, currentStat.hp, maxHp);
-                }
+                BattleUIManager.Instance.UpdateHealthBar(playerIndex, currentStat.hp, maxHp);
 
                 Debug.Log($"Data Loaded. HP: {currentStat.hp}, Skill: {currentStat.skillTemplate}");
             }
@@ -162,8 +158,22 @@ public class BallUnit : MonoBehaviour
             var pirate = skill as ShootExplosiveBombSkill;
             if (pirate != null)
             {
-                pirate.attackTime = currentStat.attackTime > 0 ? currentStat.attackTime : 1.5f;
-                pirate.explosionRadius = currentStat.explosionRadius > 0 ? currentStat.explosionRadius : 2.5f;
+                if (currentStat.attackTime > 0)
+                {
+                    pirate.attackTime = currentStat.attackTime;
+                }
+                else
+                {
+                    pirate.attackTime = 1.5f;
+                }
+                if (currentStat.explosionRadius > 0)
+                {
+                    pirate.explosionRadius = currentStat.explosionRadius;
+                }
+                else
+                {
+                    pirate.explosionRadius = 2.5f;
+                }
                 pirate.projectileSpriteName = currentStat.spriteProjectile;
             }
         }
@@ -178,12 +188,14 @@ public class BallUnit : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if (isInvincible) return;
         if (currentStat.evasionChance > 0 && UnityEngine.Random.value < currentStat.evasionChance)
         {
             Debug.Log(currentStat.name + "Dodge the attack");
             if (damagePopup != null)
             {
-                GameObject popup = Instantiate(damagePopup, transform.position, Quaternion.identity);
+                GameObject popup = Instantiate(damagePopup, transform.position, 
+                    Quaternion.identity);
                 popup.GetComponent<DamagePopup>().Setup("Miss!");
                 return;
             }
@@ -193,7 +205,9 @@ public class BallUnit : MonoBehaviour
             float reducedDamage = damage * (1f - currentStat.damageReduce);
             damage = Mathf.RoundToInt(reducedDamage);
             Debug.Log(currentStat.name + " Blocked! Damage reduced.");
-            if (damagePopup != null) Instantiate(damagePopup, transform.position, Quaternion.identity).GetComponent<DamagePopup>().Setup(damage.ToString());
+            if (damagePopup != null) 
+                Instantiate(damagePopup, transform.position, Quaternion.identity)
+                    .GetComponent<DamagePopup>().Setup(damage.ToString());
         }
         if (audioSource != null && hitSound != null)
         {
@@ -205,7 +219,8 @@ public class BallUnit : MonoBehaviour
         {
             BattleUIManager.Instance.UpdateHealthBar(playerIndex, currentStat.hp, maxHp);
         }
-        Debug.Log(gameObject.name + " Receive " + damage + " HP Left : " + currentStat.hp);
+        Debug.Log(gameObject.name + " Receive " + damage + " " +
+            "HP Left : " + currentStat.hp);
 
         if (damagePopup != null)
         {
@@ -313,24 +328,20 @@ public class BallUnit : MonoBehaviour
     {
         if (BattleUIManager.Instance == null) return;
 
-        int highestHpFound = 0;
-        int targetMaxHp = maxHp;
-
+        int totalCurrentHp = 0;
+        int totalMaxHp = 0;
 
         BallUnit[] allBalls = FindObjectsByType<BallUnit>(FindObjectsSortMode.None);
         foreach (var ball in allBalls)
         {
-            if (ball.playerIndex == this.playerIndex && ball.currentStat != null && ball.currentStat.hp > 0)
+            if (ball.playerIndex == this.playerIndex && ball.currentStat != null)
             {
-                if (ball.currentStat.hp > highestHpFound)
-                {
-                    highestHpFound = ball.currentStat.hp;
-                    targetMaxHp = ball.maxHp;
-                }
+                if (ball.currentStat.hp > 0) totalCurrentHp += ball.currentStat.hp;
+                totalMaxHp = ball.maxHp;
             }
         }
 
-        BattleUIManager.Instance.UpdateHealthBar(playerIndex, highestHpFound, targetMaxHp);
+        BattleUIManager.Instance.UpdateHealthBar(playerIndex, totalCurrentHp, totalMaxHp);
     }
 
     void DisableTeamCollisions()

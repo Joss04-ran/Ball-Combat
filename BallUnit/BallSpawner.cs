@@ -5,14 +5,10 @@ public class BallSpawner : MonoBehaviour
     [Header("Ball Settings")]
     public GameObject ballPrefab;
     public GameObject ballPrefab2;
-    public GameObject ballPrefab3;
-    public GameObject ballPrefab4;
 
     [Header("Spawn Points")]
     public Transform spawnPoint1;
     public Transform spawnPoint2;
-    public Transform spawnPoint3;
-    public Transform spawnPoint4;
 
     void Start()
     {
@@ -28,12 +24,6 @@ public class BallSpawner : MonoBehaviour
 
             GameObject ball2 = Instantiate(ballPrefab2, spawnPoint2.position, Quaternion.identity);
             ball2.GetComponent<BallUnit>().playerIndex = 2;
-
-            GameObject ball3 = Instantiate(ballPrefab3, spawnPoint3.position, Quaternion.identity);
-            ball3.GetComponent<BallUnit>().playerIndex = 3;
-
-            GameObject ball4 = Instantiate(ballPrefab4, spawnPoint4.position, Quaternion.identity);
-            ball4.GetComponent<BallUnit>().playerIndex = 4;
 
 
             Debug.Log("Spawned 2 balls");

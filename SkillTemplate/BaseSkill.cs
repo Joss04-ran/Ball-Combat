@@ -17,11 +17,6 @@ public abstract class BaseSkill : MonoBehaviour
             weaponSprite.enabled = false;
         }
     }
-    public virtual void SetupSkillData(BallStatData data)
-    {
-
-    }
-
     public abstract void ActivateSkill();
 
     public void SetDamage(int damageValue)

@@ -1,38 +1,64 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BallSpawnerTeam : MonoBehaviour
 {
-    [Header("Ball Settings")]
-    public GameObject ballPrefab;
-    public GameObject ballPrefab2;
-    public GameObject ballPrefab3;
-    public GameObject ballPrefab4;
+    [Header("Team 1 Setup")]
+    public int team1Index = 1;
+    public string team1Name = "Team Red";
+    public List<GameObject> team1Prefabs;
+    public List<Transform> team1Spawns;
 
-    [Header("Spawn Points")]
-    public Transform spawnPoint1; 
-    public Transform spawnPoint2; 
-    public Transform spawnPoint3;
-    public Transform spawnPoint4;
+    [Header("Team 2 Setup")]
+    public int team2Index = 2;
+    public string team2Name = "Team Blue";
+    public List<GameObject> team2Prefabs;
+    public List<Transform> team2Spawns;
 
     void Start()
     {
-        SpawnBalls();
+        List<BallUnit> team1Units = SpawnTeam(team1Prefabs, team1Spawns, team1Index);
+        List<BallUnit> team2Units = SpawnTeam(team2Prefabs, team2Spawns, team2Index);
+        AutoAssignWalls(team1Index, team1Units);
+        AutoAssignWalls(team2Index, team2Units);
+        if (BattleUIManager.Instance != null)
+        {
+            BattleUIManager.Instance.SetPlayerName(team1Index, team1Name);
+            BattleUIManager.Instance.SetPlayerName(team2Index, team2Name);
+        }
     }
 
-    void SpawnBalls()
+    List<BallUnit> SpawnTeam(List<GameObject> prefabs, List<Transform> spawns, int teamIndex)
     {
-        if (ballPrefab != null)
-        {
-            GameObject ball1 = Instantiate(ballPrefab, spawnPoint1.position, Quaternion.identity);
-            ball1.GetComponent<BallUnit>().playerIndex = 1;
+        List<BallUnit> spawnedUnits = new List<BallUnit>();
+        int count = Mathf.Min(prefabs.Count, spawns.Count);
 
-            GameObject ball2 = Instantiate(ballPrefab2, spawnPoint2.position, Quaternion.identity);
-            ball2.GetComponent<BallUnit>().playerIndex = 2;
-            Debug.Log("Spawned 2 balls");
-        }
-        else
+        for (int i = 0; i < count; i++)
         {
-            Debug.LogError("No Balls");
+            if (prefabs[i] != null && spawns[i] != null)
+            {
+                GameObject ball = Instantiate(prefabs[i], spawns[i].position, Quaternion.identity);
+                BallUnit unit = ball.GetComponent<BallUnit>();
+                if (unit != null)
+                {
+                    unit.playerIndex = teamIndex;
+                    spawnedUnits.Add(unit); 
+                }
+            }
+        }
+        return spawnedUnits;
+    }
+    void AutoAssignWalls(int teamIndex, List<BallUnit> teamUnits)
+    {
+        if (teamUnits.Count < 2) return; 
+        ContainmentWall[] walls = FindObjectsByType<ContainmentWall>(FindObjectsSortMode.None);
+        foreach (ContainmentWall wall in walls)
+        {
+            if (wall.teamIndex == teamIndex)
+            {
+                wall.InitializeWall(teamUnits[0], teamUnits[1]);
+                break;
+            }
         }
     }
 }

@@ -18,14 +18,6 @@ public class ShootWithIncreasedAttackSpeedSkill : BaseSkill
 
     private Sprite loadedBulletSprite;
     private static Sprite fallbackBulletSprite;
-    public override void SetupSkillData(BallStatData data)
-    {
-        this.baseAccuracy = data.accuracy;
-        this.currentAccuracy = data.accuracy;
-        this.interval = data.interval;
-        this.attackTime = data.attackTime;
-        this.projectileSpriteName = data.spriteProjectile;
-    }
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();

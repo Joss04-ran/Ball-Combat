@@ -13,10 +13,10 @@ public class ArrowProjectile : MonoBehaviour
     void OnTriggerEnter2D(Collider2D col)
     {
         BallUnit target = col.GetComponent<BallUnit>();
-        if (target != null && target != shooterUnit)
+        if (target != null && target.playerIndex != shooterUnit.playerIndex)
         {
             target.TakeDamage(damage);
-            Destroy(gameObject); 
+            Destroy(gameObject);
         }
     }
 }
