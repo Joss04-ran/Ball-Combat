@@ -6,7 +6,7 @@ public class SwordAndShieldSkill : BaseSkill
     private Rigidbody2D rb;
     private Transform ultimatePivot;
     private bool isUltimateActive = false;
-    private bool isSwinging = false; 
+    private bool isSwinging = false;
 
     private TrailRenderer weaponTrail;
     private Vector3 originalWeaponScale;
@@ -17,7 +17,7 @@ public class SwordAndShieldSkill : BaseSkill
         if (weaponSprite != null)
         {
             weaponTrail = weaponSprite.GetComponent<TrailRenderer>();
-            if (weaponTrail != null) weaponTrail.emitting = false; 
+            if (weaponTrail != null) weaponTrail.emitting = false;
 
             originalWeaponScale = weaponSprite.transform.localScale;
         }
@@ -40,7 +40,7 @@ public class SwordAndShieldSkill : BaseSkill
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (!BattleManager.isStart) return;
-        if (isSwinging) return; 
+        if (isSwinging) return;
 
         BallUnit targetBall = collision.gameObject.GetComponent<BallUnit>();
 
@@ -81,14 +81,14 @@ public class SwordAndShieldSkill : BaseSkill
                 }
             }
         });
-        swingSequence.AppendInterval(0.05f); 
+        swingSequence.AppendInterval(0.05f);
         swingSequence.OnComplete(() =>
         {
             if (weaponTrail != null) weaponTrail.emitting = false;
             if (rb != null)
             {
                 weaponPivot.DORotateQuaternion(Quaternion.LookRotation(Vector3.forward, Vector3.Cross(Vector3.forward, rb.linearVelocity.normalized)), 0.1f)
-                .OnComplete(() => isSwinging = false); 
+                .OnComplete(() => isSwinging = false);
             }
             else
             {

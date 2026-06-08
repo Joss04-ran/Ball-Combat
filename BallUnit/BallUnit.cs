@@ -28,6 +28,7 @@ public class BallUnit : MonoBehaviour
     private int baseAttack;
     public bool isInvincible = false;
     public static List<BallUnit> activeBalls = new List<BallUnit>();
+    public GameObject minionPrefab;
 
     void Awake()
     {
@@ -68,12 +69,9 @@ public class BallUnit : MonoBehaviour
                         movement.initSpeed = currentStat.movementSpeed;
                         baseSpeed = currentStat.movementSpeed;
                     }
-                    transform.DOScale(new Vector3(currentStat.size, currentStat.size, 1f), currentStat.size - 0.2f).SetEase(Ease.OutBack).SetLink(gameObject); ;
-                    Rigidbody2D rb = GetComponent<Rigidbody2D>();
-                    if (rb != null)
-                    {
-                        rb.mass = currentStat.mass > 0 ? currentStat.mass : 1f;
-                    }
+                    transform.DOScale(new Vector3(currentStat.size, currentStat.size, 1f), currentStat.size - 0.2f)
+                        .SetEase(Ease.OutBack)
+                        .SetLink(gameObject);
                     if (!isClone && currentStat.amount > 1)
                     {
                         for (int i = 0; i < currentStat.amount - 1; i++)
@@ -89,6 +87,10 @@ public class BallUnit : MonoBehaviour
                         }
                     }
                     ApplySkillTemplate(currentStat.skillTemplate);
+                }
+                if (BattleUIManager.Instance != null && BattleUIManager.Instance is BattleUIManager1v1)
+                {
+                    BattleUIManager.Instance.SetPlayerName(playerIndex, currentStat.name);
                 }
                 BattleUIManager.Instance.UpdateHealthBar(playerIndex, currentStat.hp, maxHp);
 
@@ -177,6 +179,10 @@ public class BallUnit : MonoBehaviour
                 pirate.projectileSpriteName = currentStat.spriteProjectile;
             }
         }
+        else if (skillName == "SwordCursedAndDrainHealth")
+        {
+            skill = gameObject.AddComponent<SwordCursedAndDrainHealth>();
+        }
         if (skill != null)
         {
             skill.SetDamage(currentStat.damage);
@@ -254,7 +260,7 @@ public class BallUnit : MonoBehaviour
                 Debug.Log($"{gameObject.name} Buff Ended.");
                 buffParticle.Stop();
             }
-        });
+        }).SetLink(gameObject);
     }
 
     public void ApplySheriffUltimateBuff(float ultimateAccuracy, float duration)
@@ -275,7 +281,7 @@ public class BallUnit : MonoBehaviour
                     if (buffParticle != null) buffParticle.Stop();
                     Debug.Log($"{gameObject.name} Sheriff Buff Ended.");
                 }
-            });
+            }).SetLink(gameObject);
         }
     }
     public void Heal(int amount)
@@ -302,7 +308,7 @@ public class BallUnit : MonoBehaviour
                     skill.skillDamage = baseAttack;
                     if (weaponSpriteRenderer != null) weaponSpriteRenderer.color = Color.white;
                 }
-            });
+            }).SetLink(gameObject);
         }
     }
     public void ApplySwiftnessBuff(float extraSpeed, float duration)
@@ -320,7 +326,7 @@ public class BallUnit : MonoBehaviour
                     movement.initSpeed = baseSpeed;
                     if (buffParticle != null) buffParticle.Stop();
                 }
-            });
+            }).SetLink(gameObject);
         }
     }
 

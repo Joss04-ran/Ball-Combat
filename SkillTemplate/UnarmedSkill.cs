@@ -62,7 +62,8 @@ public class UnarmedSkill : BaseSkill
                     weaponSprite.transform.localPosition = originalLocalPos; 
                     weaponSprite.transform.DOLocalMoveX(originalLocalPos.x + punchDistance, hitInterval / 2f)
                         .SetEase(Ease.OutFlash)
-                        .SetUpdate(true) 
+                        .SetUpdate(true)
+                        .SetLink(gameObject)
                         .OnComplete(() =>
                         {
                             weaponSprite.transform.DOLocalMoveX(originalLocalPos.x, hitInterval / 2f)

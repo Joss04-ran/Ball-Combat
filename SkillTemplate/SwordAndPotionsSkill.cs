@@ -18,7 +18,7 @@ public class SwordAndPotionsSkill : BaseSkill
     {
         if (weaponSprite != null)
         {
-            weaponSprite.enabled = true; // Perlihatkan tongkat
+            weaponSprite.enabled = true;
             originalWeaponScale = weaponSprite.transform.localScale;
         }
     }
@@ -90,14 +90,14 @@ public class SwordAndPotionsSkill : BaseSkill
     private void EvaluateAndThrowPotion()
     {
         if (ultimateData == null || ultimateData.listPotions == null) return;
-        float roll = Random.value; 
+        float roll = Random.value;
         var p = ultimateData.listPotions;
         System.Action effectCallback = null;
         Color potionColor = Color.white;
         if (roll <= p.healingPotionChance)
         {
             effectCallback = () => thisUnit.Heal(Mathf.RoundToInt(p.healingAmount));
-            potionColor = Color.green; 
+            potionColor = Color.green;
         }
         else if (roll <= p.healingPotionChance + p.strengthPotionChance)
         {
@@ -114,7 +114,7 @@ public class SwordAndPotionsSkill : BaseSkill
     private void VisualThrowPotion(Color color, System.Action onImpact)
     {
         GameObject potion = new GameObject("ThrownPotion");
-        Vector3 startPosition = transform.position; 
+        Vector3 startPosition = transform.position;
         potion.transform.position = startPosition;
         potion.transform.localScale = new Vector3(50f, 50f, 1f);
         SpriteRenderer sr = potion.AddComponent<SpriteRenderer>();
@@ -125,9 +125,9 @@ public class SwordAndPotionsSkill : BaseSkill
         sr.color = color;
         sr.sortingOrder = 5;
         float throwDuration = 1f;
-        float progress = 0f; 
+        float progress = 0f;
         DOTween.To(() => progress, x => progress = x, 1f, throwDuration)
-            .SetEase(Ease.Linear) 
+            .SetEase(Ease.Linear)
             .SetUpdate(true)
             .OnUpdate(() =>
             {
@@ -135,7 +135,7 @@ public class SwordAndPotionsSkill : BaseSkill
                 {
                     Vector3 currentTraderPos = transform.position;
                     Vector3 basePosition = Vector3.Lerp(startPosition, currentTraderPos, progress);
-                    float parabolaHeight = Mathf.Sin(progress * Mathf.PI) * 2f; 
+                    float parabolaHeight = Mathf.Sin(progress * Mathf.PI) * 2f;
                     potion.transform.position = new Vector3(basePosition.x, basePosition.y + parabolaHeight, basePosition.z);
                     potion.transform.Rotate(0, 0, 720f * Time.deltaTime);
                 }
