@@ -13,6 +13,7 @@ public class UnarmedSkill : BaseSkill
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (!BattleManager.isStart) return;
+        BallUnit thisUnit = GetComponent<BallUnit>();
         BallUnit targetBall = collision.gameObject.GetComponent<BallUnit>();
 
         if (targetBall != null)

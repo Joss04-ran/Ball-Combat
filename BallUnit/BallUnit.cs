@@ -19,9 +19,9 @@ public class BallUnit : MonoBehaviour
     [HideInInspector] public bool isClone = false;
     [HideInInspector] public BallStatData currentStat;
     private BallMovement movement;
-    public GameObject explosionPrefab; 
+    public GameObject explosionPrefab;
     public AudioClip hitSound;
-    public AudioClip attackSound; 
+    public AudioClip attackSound;
     private AudioSource audioSource;
     public ParticleSystem buffParticle;
     private float baseSpeed;
@@ -29,6 +29,7 @@ public class BallUnit : MonoBehaviour
     public bool isInvincible = false;
     public static List<BallUnit> activeBalls = new List<BallUnit>();
     public GameObject minionPrefab;
+    public AudioClip specialSkillSound;
 
     void Awake()
     {
@@ -37,10 +38,11 @@ public class BallUnit : MonoBehaviour
     }
 
     void Start()
-    { 
+    {
         LoadStatsFromJson();
         Invoke("DisableTeamCollisions", 0.1f);
     }
+
     public void PlayAttackSound()
     {
         if (audioSource != null && attackSound != null)
@@ -48,6 +50,15 @@ public class BallUnit : MonoBehaviour
             audioSource.PlayOneShot(attackSound);
         }
     }
+
+    public void PlaySpecialSkillSound()
+    {
+        if (audioSource != null && specialSkillSound != null)
+        {
+            audioSource.PlayOneShot(specialSkillSound);
+        }
+    }
+
     void LoadStatsFromJson()
     {
         try
@@ -69,15 +80,16 @@ public class BallUnit : MonoBehaviour
                         movement.initSpeed = currentStat.movementSpeed;
                         baseSpeed = currentStat.movementSpeed;
                     }
+
                     transform.DOScale(new Vector3(currentStat.size, currentStat.size, 1f), currentStat.size - 0.2f)
                         .SetEase(Ease.OutBack)
                         .SetLink(gameObject);
+
                     if (!isClone && currentStat.amount > 1)
                     {
                         for (int i = 0; i < currentStat.amount - 1; i++)
                         {
                             GameObject clone = Instantiate(gameObject, transform.position, Quaternion.identity);
-
                             BallUnit cloneUnit = clone.GetComponent<BallUnit>();
                             cloneUnit.isClone = true;
                             cloneUnit.playerIndex = this.playerIndex;
@@ -86,8 +98,10 @@ public class BallUnit : MonoBehaviour
                             clone.transform.localScale = Vector3.zero;
                         }
                     }
+
                     ApplySkillTemplate(currentStat.skillTemplate);
                 }
+
                 if (BattleUIManager.Instance != null && BattleUIManager.Instance is BattleUIManager1v1)
                 {
                     BattleUIManager.Instance.SetPlayerName(playerIndex, currentStat.name);
@@ -109,18 +123,16 @@ public class BallUnit : MonoBehaviour
 
     void ApplySkillTemplate(string skillName)
     {
-
         BaseSkill skill = null;
+
         if (skillName == "Unarmed")
         {
             skill = gameObject.AddComponent<UnarmedSkill>();
         }
-
         else if (skillName == "SwordAndShield")
         {
             skill = gameObject.AddComponent<SwordAndShieldSkill>();
         }
-
         else if (skillName == "SimpleShootProjectile")
         {
             skill = gameObject.AddComponent<SimpleShootProjectileSkill>();
@@ -130,7 +142,6 @@ public class BallUnit : MonoBehaviour
             archer.attackTime = currentStat.attackTime;
             archer.projectileSpriteName = currentStat.spriteProjectile;
         }
-
         else if (skillName == "ShootWithIncreasedAttackSpeed")
         {
             skill = gameObject.AddComponent<ShootWithIncreasedAttackSpeedSkill>();
@@ -160,22 +171,8 @@ public class BallUnit : MonoBehaviour
             var pirate = skill as ShootExplosiveBombSkill;
             if (pirate != null)
             {
-                if (currentStat.attackTime > 0)
-                {
-                    pirate.attackTime = currentStat.attackTime;
-                }
-                else
-                {
-                    pirate.attackTime = 1.5f;
-                }
-                if (currentStat.explosionRadius > 0)
-                {
-                    pirate.explosionRadius = currentStat.explosionRadius;
-                }
-                else
-                {
-                    pirate.explosionRadius = 2.5f;
-                }
+                pirate.attackTime = currentStat.attackTime > 0 ? currentStat.attackTime : 1.5f;
+                pirate.explosionRadius = currentStat.explosionRadius > 0 ? currentStat.explosionRadius : 2.5f;
                 pirate.projectileSpriteName = currentStat.spriteProjectile;
             }
         }
@@ -183,10 +180,23 @@ public class BallUnit : MonoBehaviour
         {
             skill = gameObject.AddComponent<SwordCursedAndDrainHealth>();
         }
+
+        // ── Hacker Ball ───────────────────────────────────────────────────
+        else if (skillName == "SwordWithLagAttack")
+        {
+            skill = gameObject.AddComponent<SwordWithLagAttack>();
+            var hacker = skill as SwordWithLagAttack;
+            if (hacker != null)
+            {
+                // Inject JSON-driven Lag parameters
+                hacker.SetLagParameters(currentStat.lagChance, currentStat.lagDuration);
+            }
+        }
+
         if (skill != null)
         {
             skill.SetDamage(currentStat.damage);
-            skill.SetUltimateData(currentStat.ultimateSkill); 
+            skill.SetUltimateData(currentStat.ultimateSkill);
             skill.InitializeWeapon(weaponPivot, weaponSpriteRenderer);
             skill.ActivateSkill();
         }
@@ -197,11 +207,10 @@ public class BallUnit : MonoBehaviour
         if (isInvincible) return;
         if (currentStat.evasionChance > 0 && UnityEngine.Random.value < currentStat.evasionChance)
         {
-            Debug.Log(currentStat.name + "Dodge the attack");
+            Debug.Log(currentStat.name + " Dodge the attack");
             if (damagePopup != null)
             {
-                GameObject popup = Instantiate(damagePopup, transform.position, 
-                    Quaternion.identity);
+                GameObject popup = Instantiate(damagePopup, transform.position, Quaternion.identity);
                 popup.GetComponent<DamagePopup>().Setup("Miss!");
                 return;
             }
@@ -211,7 +220,7 @@ public class BallUnit : MonoBehaviour
             float reducedDamage = damage * (1f - currentStat.damageReduce);
             damage = Mathf.RoundToInt(reducedDamage);
             Debug.Log(currentStat.name + " Blocked! Damage reduced.");
-            if (damagePopup != null) 
+            if (damagePopup != null)
                 Instantiate(damagePopup, transform.position, Quaternion.identity)
                     .GetComponent<DamagePopup>().Setup(damage.ToString());
         }
@@ -225,8 +234,7 @@ public class BallUnit : MonoBehaviour
         {
             BattleUIManager.Instance.UpdateHealthBar(playerIndex, currentStat.hp, maxHp);
         }
-        Debug.Log(gameObject.name + " Receive " + damage + " " +
-            "HP Left : " + currentStat.hp);
+        Debug.Log(gameObject.name + " Receive " + damage + " HP Left : " + currentStat.hp);
 
         if (damagePopup != null)
         {
@@ -266,7 +274,6 @@ public class BallUnit : MonoBehaviour
     public void ApplySheriffUltimateBuff(float ultimateAccuracy, float duration)
     {
         Debug.Log($"{gameObject.name} SHERIFF ULTIMATE! High Noon Accuracy!");
-
         var skill = GetComponent<ShootWithIncreasedAttackSpeedSkill>();
         if (skill != null)
         {
@@ -284,23 +291,27 @@ public class BallUnit : MonoBehaviour
             }).SetLink(gameObject);
         }
     }
+
     public void Heal(int amount)
     {
         currentStat.hp = Mathf.Min(maxHp, currentStat.hp + amount);
         if (BattleUIManager.Instance != null) BattleUIManager.Instance.UpdateHealthBar(playerIndex, currentStat.hp, maxHp);
-
         Debug.Log($"{gameObject.name} healed for {amount}. HP: {currentStat.hp}");
-        if (damagePopup != null) Instantiate(damagePopup, transform.position, Quaternion.identity).GetComponent<DamagePopup>().Setup($"+{amount} HP");
+        if (damagePopup != null)
+            Instantiate(damagePopup, transform.position, Quaternion.identity)
+                .GetComponent<DamagePopup>().Setup($"+{amount} HP");
     }
+
     public void ApplyStrengthBuff(int extraDamage, float duration)
     {
         var skill = GetComponent<SwordAndPotionsSkill>();
         if (skill != null)
         {
             skill.skillDamage = extraDamage;
-            if (damagePopup != null) Instantiate(damagePopup, transform.position, Quaternion.identity).GetComponent<DamagePopup>().Setup("+ATK!");
+            if (damagePopup != null)
+                Instantiate(damagePopup, transform.position, Quaternion.identity)
+                    .GetComponent<DamagePopup>().Setup("+ATK!");
             if (weaponSpriteRenderer != null) weaponSpriteRenderer.color = Color.red;
-
             DG.Tweening.DOVirtual.DelayedCall(duration, () =>
             {
                 if (skill != null)
@@ -311,14 +322,16 @@ public class BallUnit : MonoBehaviour
             }).SetLink(gameObject);
         }
     }
+
     public void ApplySwiftnessBuff(float extraSpeed, float duration)
     {
         if (movement != null)
         {
             movement.initSpeed = extraSpeed;
-            if (damagePopup != null) Instantiate(damagePopup, transform.position, Quaternion.identity).GetComponent<DamagePopup>().Setup("+SPEED!");
+            if (damagePopup != null)
+                Instantiate(damagePopup, transform.position, Quaternion.identity)
+                    .GetComponent<DamagePopup>().Setup("+SPEED!");
             if (buffParticle != null) buffParticle.Play();
-
             DG.Tweening.DOVirtual.DelayedCall(duration, () =>
             {
                 if (movement != null)
@@ -333,10 +346,8 @@ public class BallUnit : MonoBehaviour
     public void UpdateTeamHealthBar()
     {
         if (BattleUIManager.Instance == null) return;
-
         int totalCurrentHp = 0;
         int totalMaxHp = 0;
-
         BallUnit[] allBalls = FindObjectsByType<BallUnit>(FindObjectsSortMode.None);
         foreach (var ball in allBalls)
         {
@@ -346,7 +357,6 @@ public class BallUnit : MonoBehaviour
                 totalMaxHp = ball.maxHp;
             }
         }
-
         BattleUIManager.Instance.UpdateHealthBar(playerIndex, totalCurrentHp, totalMaxHp);
     }
 
@@ -354,7 +364,6 @@ public class BallUnit : MonoBehaviour
     {
         Collider2D myCol = GetComponent<Collider2D>();
         if (myCol == null) return;
-
         BallUnit[] allBalls = FindObjectsByType<BallUnit>(FindObjectsSortMode.None);
         foreach (BallUnit ally in allBalls)
         {
@@ -362,9 +371,7 @@ public class BallUnit : MonoBehaviour
             {
                 Collider2D allyCol = ally.GetComponent<Collider2D>();
                 if (allyCol != null)
-                {
                     Physics2D.IgnoreCollision(myCol, allyCol, true);
-                }
             }
         }
     }
@@ -375,10 +382,7 @@ public class BallUnit : MonoBehaviour
         if (gameObject.name == "Pirate")
         {
             var pirateSkill = GetComponent<ShootExplosiveBombSkill>();
-            if (pirateSkill != null)
-            {
-                pirateSkill.TriggerOnDeathUltimate();
-            }
+            if (pirateSkill != null) pirateSkill.TriggerOnDeathUltimate();
         }
         if (gameObject.name == "Brawlings")
         {
@@ -389,7 +393,8 @@ public class BallUnit : MonoBehaviour
         BallUnit[] allBalls = FindObjectsByType<BallUnit>(FindObjectsSortMode.None);
         foreach (var ball in allBalls)
         {
-            if (ball != this && ball.playerIndex == this.playerIndex && ball.currentStat != null && ball.currentStat.hp > 0)
+            if (ball != this && ball.playerIndex == this.playerIndex
+                && ball.currentStat != null && ball.currentStat.hp > 0)
             {
                 anyTeamAlive = true;
                 break;
@@ -405,7 +410,8 @@ public class BallUnit : MonoBehaviour
         }
         foreach (var ball in allBalls)
         {
-            if (ball != this && ball.playerIndex == this.playerIndex && ball.currentStat != null && ball.currentStat.hp > 0)
+            if (ball != this && ball.playerIndex == this.playerIndex
+                && ball.currentStat != null && ball.currentStat.hp > 0)
             {
                 ball.UpdateTeamHealthBar();
                 break;

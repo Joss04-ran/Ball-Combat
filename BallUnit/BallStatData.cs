@@ -35,9 +35,9 @@ public class UltimateSkillData
     public float duration;
     public float chanceIncreasePerUnitDefeat;
     public float explosionRadius;
-    // Necromancer ultimate fields
     public int minionCount;
     public float minionDuration;
+    public float corruptionDuration;
 }
 
 [System.Serializable]
@@ -65,4 +65,6 @@ public class BallStatData
     public int amount;
     public float explosionRadius;
     public int hpDrainAmount;
+    public float lagChance;
+    public float lagDuration;
 }
